@@ -1,6 +1,10 @@
 #pragma once
 
 class Player;
+class Bonfire;
+
+#include <vector>
+
 class Game
 {
 public: 
@@ -15,4 +19,5 @@ private:
 	void Draw();
 
 	Player* m_player;
+	std::vector<Bonfire*>  m_bonfires;
 };
