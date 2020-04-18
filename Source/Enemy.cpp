@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "Spell.h"
+#include "Bonfire.h"
 
 #include "Graphics.h"
 #include "Sprite.h"
@@ -69,7 +70,33 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 	}
 	else
 	{
-		// TODO: move towards target
+		Vec2 toTarget = m_target->GetTransform().Position - m_sprite->GetTransform().Position;
+		float dist = Length(toTarget);
+		toTarget = Normalize(toTarget);
+
+		m_sprite->Move(toTarget.X * deltaTime * 300.0f, toTarget.Y * deltaTime * 300.0f);
+
+		// Juicy rotation:
+		extern float g_totalTime;
+		float rot = sin((g_totalTime + m_seed) * 15.0f);
+		float neg = false;
+		if (rot < 0.0f)
+		{
+			neg = true;
+		}
+		rot = pow(abs(rot), 0.55f);
+		if (neg)
+		{
+			rot *= -1.0f;
+		}
+		
+		// Align taking into account the direction:
+		float cos0 = Dot(Vec2(0.0f, 1.0f), toTarget);
+		float alignRot = acos(cos0) * RAD_TO_DEG;
+
+		m_sprite->SetRotation(alignRot + (rot * 10.0f));
+
+		
 		// TODO: logic to select other bonfire
 	}
 }
@@ -90,6 +117,7 @@ void Enemy::Reset()
 	m_target = nullptr;
 	m_hitPoints = 1;
 	m_bonfires.clear();
+	m_seed = rand();
 }
 
 bool Enemy::IsActive() const

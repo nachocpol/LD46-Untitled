@@ -2,6 +2,8 @@
 #include "Player.h"
 #include "Bonfire.h"
 #include "Enemy.h"
+#include "Image.h"
+#include "Sprite.h"
 
 #include "Time.h"
 #include "Graphics.h"
@@ -10,6 +12,8 @@
 #include <cstdio>
 
 using namespace Waffle;
+
+#define LOAD_IMG_SPRITE(path,img,spr) img = Image::CreateFromFile(path); spr = new Sprite((float)img->GetWidth(),(float)img->GetHeight(),img);
 
 Game::Game()
 	:m_player(nullptr)
@@ -20,6 +24,8 @@ Game::Game()
 Game::~Game()
 {
 }
+
+float g_totalTime = 0.0f;
 
 void Game::Run()
 {
@@ -33,7 +39,6 @@ void Game::Run()
 	// Init after graphics, as we may load images:
 	Init();
 
-	float totalTime = 0.0f;
 	float deltaTime = 0.0f;
 
 	Timer timer;
@@ -53,7 +58,7 @@ void Game::Run()
 
 		// Update frame time:
 		deltaTime = timer.Stop() / 1000.0f;
-		totalTime += deltaTime;
+		g_totalTime += deltaTime;
 	}
 }
 
@@ -73,6 +78,27 @@ void Game::Init()
 		m_enemies.push_back(enemy);
 	}
 	
+	// Setup ground (static background)
+	m_groundImage = Image::CreateFromFile("data:GroundCracks.png");
+	float groundNumX = 128;
+	float groundNumY = 128;
+	m_groundSprite = new Sprite(m_groundImage->GetWidth() * groundNumX, m_groundImage->GetHeight() * groundNumY, m_groundImage);
+	m_groundSprite->SetImageScaleBias(groundNumX, groundNumY, 0.0f, 0.0f);
+
+
+	// Setup UI:
+	LOAD_IMG_SPRITE("data:PixelControls.png", m_controlsImage, m_controlsSrite);
+	m_controlsSrite->SetScale(3.0f, 3.0f);
+	m_controlsSrite->SetPosition(0.0f, -50.0f);
+	m_controlsSrite->SetIsUI(true);
+
+	LOAD_IMG_SPRITE("data:Frostbite_white.png", m_logoImage, m_logoSrite);
+	m_logoSrite->SetScale(1.25f, 1.25f);
+	m_logoSrite->SetPosition(0.0f, 200.0f);
+	m_logoSrite->SetIsUI(true);
+
+	LOAD_IMG_SPRITE("data:PixelControls.png", m_pauseImage, m_pauseSrite);
+
 	Reset();
 }
 
@@ -99,6 +125,20 @@ void Game::Update(float deltaTime)
 
 		case State::Pause:
 		{
+			if (m_pauseTimer >= 0.35f)
+			{
+				if (Input::GetKeyPressed(Key::ESC))
+				{
+					m_gameState = State::Round;
+					m_pauseTimer = 0.0f;
+				}
+			}
+			else
+			{
+				m_pauseTimer += deltaTime;
+			}
+
+			deltaTime = 0.0f; // Pause!
 			break;
 		}
 
@@ -129,6 +169,19 @@ void Game::Update(float deltaTime)
 				m_spawnTimer += deltaTime;
 			}
 
+			// Check pause:
+			if (m_pauseTimer >= 0.35f)
+			{
+				if (Input::GetKeyPressed(Key::ESC))
+				{
+					m_pauseTimer = 0.0f;
+					m_gameState = State::Pause;
+				}
+			}
+			else
+			{
+				m_pauseTimer += deltaTime;
+			}
 
 			break;
 		}
@@ -153,9 +206,23 @@ void Game::Update(float deltaTime)
 			bonfire->Update(deltaTime);
 		}
 
+		int enemiesAlive = 0;
 		for (const auto enemy : m_enemies)
 		{
-			enemy->Update(deltaTime, m_player->GetSpells());
+			if (enemy->IsActive())
+			{
+				++enemiesAlive;
+				enemy->Update(deltaTime, m_player->GetSpells());
+			}
+		}
+
+		if (m_enemiesToSpawn == 0 && enemiesAlive == 0)
+		{
+			// Round complete:
+			printf("Round completed! \n");
+			m_gameState = State::RoundPrep;
+			++m_curRound;
+			m_spawnTimer = 0.0f;
 		}
 	}
 }
@@ -164,7 +231,11 @@ void Game::Draw()
 {
 	Graphics* graphics = &Graphics::Get();
 
-	if (m_gameState == State::Round)
+	// Always render static background:
+	graphics->DrawSprite(m_groundSprite);
+
+	// Main render
+	if (m_gameState == State::Round || m_gameState == State::Pause)
 	{
 		for (const auto bonfire : m_bonfires)
 		{
@@ -178,6 +249,13 @@ void Game::Draw()
 
 		m_player->Draw(graphics);
 	}
+
+	// UI:
+	if (m_gameState == State::MainMenu || m_gameState == State::Pause)
+	{
+		graphics->DrawSprite(m_logoSrite);
+		graphics->DrawSprite(m_controlsSrite);
+	}
 }
 
 void Game::Reset()
@@ -186,9 +264,11 @@ void Game::Reset()
 	m_mainMenuTimer = 0.0f;
 	m_gameState = State::MainMenu;
 
-	m_spawnCD = 10.0f;
+	m_spawnCD = 5.0f;
 	m_spawnTimer = 0.0f; // init this at 0, so we don't start spawning 
 	m_totalRoundTime = 0.0f;
+
+	m_pauseTimer = 0.0f;
 
 	m_enemiesToSpawn = 0;
 	m_spawnedEnemies = 0;
@@ -208,7 +288,7 @@ void Game::Reset()
 
 void Game::SpawnEnemies()
 {
-	int numberToSpawn = 10;
+	int numberToSpawn = 15 * m_curRound;
 	if (m_enemiesToSpawn <= numberToSpawn)
 	{
 		numberToSpawn = m_enemiesToSpawn; // This is not ideal, we could spawn 1 enemy only :/
@@ -225,10 +305,10 @@ void Game::SpawnEnemies()
 	{
 		if (!enemy->IsActive())
 		{
-			float px = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 1000.0f;
-			px = __min(px, 500.0f);
-			float py = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 1000.0f;
-			py = __min(py, 500.0f);
+			float px = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 10000.0f;
+			px = __min(px, 800.0f);
+			float py = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 10000.0f;
+			py = __min(py, 800.0f);
 
 			enemy->Spawn(Vec2(px, py), m_bonfires);
 

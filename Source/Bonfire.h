@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MathUtils.h"
+
 namespace Waffle
 {
 	class Graphics;
@@ -16,6 +18,7 @@ public:
 	bool Init();
 	void Update(float deltaTime);
 	void Draw(Waffle::Graphics* graphics);
+	Waffle::Transform GetTransform()const;
 
 private:
 	Waffle::Sprite* m_sprite;

@@ -1,11 +1,16 @@
 #pragma once
 
-class Player;
-class Bonfire;
-class Enemy;
-
 #include <vector>
 
+namespace Waffle
+{
+	class Image;
+	class Sprite;
+}
+
+class Enemy;
+class Player;
+class Bonfire;
 class Game
 {
 public: 
@@ -51,4 +56,18 @@ private:
 	float m_spawnCD;
 	float m_spawnTimer;
 	float m_totalRoundTime;
+
+	float m_pauseTimer;
+
+	// Ground:
+	Waffle::Image* m_groundImage;
+	Waffle::Sprite* m_groundSprite;
+
+	// UI:
+	Waffle::Image* m_controlsImage;
+	Waffle::Sprite* m_controlsSrite;
+	Waffle::Image* m_logoImage;
+	Waffle::Sprite* m_logoSrite; 
+	Waffle::Image* m_pauseImage;
+	Waffle::Sprite* m_pauseSrite;
 };

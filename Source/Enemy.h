@@ -35,4 +35,5 @@ private:
 	Bonfire* m_target;
 	int m_hitPoints;
 	bool m_active;
+	int m_seed;
 };

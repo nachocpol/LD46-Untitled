@@ -31,3 +31,8 @@ void Bonfire::Draw(Graphics* graphics)
 {
 	graphics->DrawSprite(m_sprite);
 }
+
+Transform Bonfire::GetTransform() const
+{
+	return m_sprite->GetTransform();
+}

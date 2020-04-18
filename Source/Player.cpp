@@ -59,6 +59,8 @@ void Player::Update(float deltaTime)
 	input.Y -= Input::GetKeyPressed(Key::S) ? 1.0f : 0.0f;
 	m_sprite->Move(input.X * deltaTime * m_moveSpeed, input.Y * deltaTime * m_moveSpeed);
 
+	// Jumps: TODO
+
 	// Spell cast
 	bool castSpell = Input::GetKeyPressed(Key::Space);
 	if(castSpell && (m_spellTimer >= m_spellCD))
