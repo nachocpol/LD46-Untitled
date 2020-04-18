@@ -20,9 +20,11 @@ public:
 	void Draw(Waffle::Graphics* graphics);
 	void Reset();
 
+	float GetRadius();
 	void Use(Waffle::Vec2 pos, Waffle::Vec2 dir, float speed, float size);
 	bool IsActive()const;
 	Waffle::Transform GetTransform();
+
 
 private:
 	Waffle::Sprite* m_sprite;

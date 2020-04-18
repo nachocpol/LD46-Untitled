@@ -52,7 +52,8 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 		{
 			Vec2 spellPos = spell->GetTransform().Position;
 			float dist = Length(spellPos - m_sprite->GetTransform().Position);
-			if (dist < 55.0f)
+			dist = dist - (spell->GetRadius() + GetRadius());
+			if (dist <= 20.0f) // Add some fudge to make it easier.
 			{
 				--m_hitPoints;
 			}
@@ -74,7 +75,12 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 		float dist = Length(toTarget);
 		toTarget = Normalize(toTarget);
 
-		m_sprite->Move(toTarget.X * deltaTime * 300.0f, toTarget.Y * deltaTime * 300.0f);
+		float speed = 300.0f;
+		if (dist < 500.0f)
+		{
+			speed *= 0.5f;
+		}
+		m_sprite->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
 
 		// Juicy rotation:
 		extern float g_totalTime;
@@ -109,6 +115,16 @@ void Enemy::Draw(Graphics* graphics)
 	}
 
 	graphics->DrawSprite(m_sprite);
+}
+
+float Enemy::GetRadius()
+{
+	Vec2 spriteScale = m_sprite->GetTransform().Scale;
+	Vec2 spriteSize = m_sprite->GetSize();
+	spriteSize.X *= spriteScale.X * 0.5f;
+	spriteSize.Y *= spriteScale.Y * 0.5f;
+	float radius = sqrt(spriteSize.X * spriteSize.X + spriteSize.Y * spriteSize.Y);
+	return radius;
 }
 
 void Enemy::Reset()

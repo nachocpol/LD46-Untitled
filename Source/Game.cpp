@@ -201,11 +201,6 @@ void Game::Update(float deltaTime)
 	{
 		m_player->Update(deltaTime);
 
-		for (const auto bonfire : m_bonfires)
-		{
-			bonfire->Update(deltaTime);
-		}
-
 		int enemiesAlive = 0;
 		for (const auto enemy : m_enemies)
 		{
@@ -216,6 +211,11 @@ void Game::Update(float deltaTime)
 			}
 		}
 
+		for (const auto bonfire : m_bonfires)
+		{
+			bonfire->Update(deltaTime);
+		}
+
 		if (m_enemiesToSpawn == 0 && enemiesAlive == 0)
 		{
 			// Round complete:
@@ -223,6 +223,13 @@ void Game::Update(float deltaTime)
 			m_gameState = State::RoundPrep;
 			++m_curRound;
 			m_spawnTimer = 0.0f;
+
+			// You win!
+			if (m_curRound > k_maxRound)
+			{
+				m_gameState = State::Win;
+				printf("You won! \n");
+			}
 		}
 	}
 }
@@ -251,7 +258,7 @@ void Game::Draw()
 	}
 
 	// UI:
-	if (m_gameState == State::MainMenu || m_gameState == State::Pause)
+	if (m_gameState == State::MainMenu || m_gameState == State::Pause || m_gameState == State::Win)
 	{
 		graphics->DrawSprite(m_logoSrite);
 		graphics->DrawSprite(m_controlsSrite);

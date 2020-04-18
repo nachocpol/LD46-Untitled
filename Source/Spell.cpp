@@ -81,6 +81,16 @@ void Spell::Reset()
 	m_size = 0.0f;
 }
 
+float Spell::GetRadius()
+{
+	Vec2 spriteScale = m_sprite->GetTransform().Scale;
+	Vec2 spriteSize = m_sprite->GetSize();
+	spriteSize.X *= spriteScale.X * 0.5f;
+	spriteSize.Y *= spriteScale.Y * 0.5f;
+	float radius = sqrt(spriteSize.X * spriteSize.X + spriteSize.Y * spriteSize.Y);
+	return radius;
+}
+
 void Spell::Use(Waffle::Vec2 pos, Vec2 dir, float speed, float size)
 {
 	if (m_active)
@@ -90,10 +100,10 @@ void Spell::Use(Waffle::Vec2 pos, Vec2 dir, float speed, float size)
 	}
 	m_direction = dir;
 	m_speed = speed;
-	m_size = size;
 	m_active = true;
 
 	m_sprite->SetPosition(pos.X, pos.Y);
+	m_sprite->SetScale(size, size);
 }
 
 bool Spell::IsActive() const

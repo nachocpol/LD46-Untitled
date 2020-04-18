@@ -41,7 +41,7 @@ private:
 	void SpawnEnemies();
 
 	const int k_maxEnemies = 256;
-	const int k_maxRound = 5;
+	const int k_maxRound = 2;
 
 	Player* m_player;
 	std::vector<Bonfire*>  m_bonfires;
@@ -58,6 +58,9 @@ private:
 	float m_totalRoundTime;
 
 	float m_pauseTimer;
+
+	float m_totalHitPoints;
+	float m_curHitPoints;
 
 	// Ground:
 	Waffle::Image* m_groundImage;
