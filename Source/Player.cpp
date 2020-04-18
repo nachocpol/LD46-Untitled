@@ -62,16 +62,35 @@ void Player::Update(float deltaTime)
 	// Jumps: TODO
 
 	// Spell cast
-	bool castSpell = Input::GetKeyPressed(Key::Space);
-	if(castSpell && (m_spellTimer >= m_spellCD))
+	bool spaceDown = Input::GetKeyPressed(Key::Space);
+	if (spaceDown && (m_holdTimer >  m_maxHoldTime))
 	{
-		CastSpell(1.0f);
-		m_spellTimer = 0.0f;
+		spaceDown = false; // Force to release... 
 	}
-	else
+	if (m_holding && !spaceDown)
 	{
-		m_spellTimer += deltaTime;
+		m_holding = false;
+
+		float sizeMod = (m_holdTimer / m_maxHoldTime) * 3.0f; // Increase the size
+		
+		// But alo take into account timer! Avoid spamming it.
+		if (m_spellTimer > m_spellCD)
+		{
+			CastSpell(2.5f + sizeMod);
+			m_spellTimer = 0.0f;
+		}
+
+		m_holdTimer = 0.0f;
 	}
+	m_spellTimer += deltaTime;
+
+	// Update state and holding timer:
+	m_holding = spaceDown;
+	if (m_holding)
+	{
+		m_holdTimer += deltaTime;
+	}
+
 
 	// Update spells:
 	for (const auto spell : m_spellPool)
@@ -102,6 +121,11 @@ const std::vector<Spell*>& Player::GetSpells() const
 void Player::Reset()
 {
 	m_moveSpeed = 350.0f;
+
+	m_holding = false;
+	m_maxHoldTime = 1.5f;
+	m_holdTimer = 0.0f;
+
 	m_spellCD = 0.35f;
 	m_spellTimer = m_spellCD;
 
@@ -118,22 +142,46 @@ void Player::Reset()
 
 void Player::CastSpell(float size)
 {
+	// The number of balls could be related to how many bonfires you have!
+
+
+	Vec2 pos = m_sprite->GetTransform().Position;
+
+	Vec2 viewport = Graphics::Get().GetCurViewport();
+	float mouseX = (float)Input::GetMouseX();
+	float mouseY = (float)Input::GetMouseY();
+	Vec2 center(viewport.X * 0.5f, viewport.Y * 0.5f);
+	
+	Vec2 dir = Vec2(mouseX, mouseY) - center;
+	dir = Normalize(dir);
+	dir.Y = -dir.Y;
+
+	Vec2 dirs[3];
+	dirs[0] = dir;	
+
+	// Lets figure out directions in an arc:
+	float rot = atan2(dir.Y, dir.X) * RAD_TO_DEG;
+	float rotDelta = 15.0f; // Degrees;
+	{
+		float beta = (rot + rotDelta) * DEG_TO_RAD;
+		dirs[1].X = cos(beta);
+		dirs[1].Y = sin(beta);
+	}
+	{
+		float beta = (rot - rotDelta) * DEG_TO_RAD;
+		dirs[2].X = cos(beta);
+		dirs[2].Y = sin(beta);
+	}
+
+	int toSpawn = 3;
 	for (const auto spell : m_spellPool)
 	{
 		if (!spell->IsActive())
 		{
-			Vec2 pos = m_sprite->GetTransform().Position;
-
-			Vec2 viewport = Graphics::Get().GetCurViewport();
-			float mouseX = (float)Input::GetMouseX();
-			float mouseY = (float)Input::GetMouseY();
-
-			Vec2 center(viewport.X * 0.5f, viewport.Y * 0.5f);
-			Vec2 dir = Vec2(mouseX, mouseY) - center;
-			dir = Normalize(dir);
-			dir.Y = -dir.Y;
-
-			spell->Use(pos, dir, 1900.0f, 1.0f);
+			spell->Use(pos, dirs[--toSpawn], 900.0f, size);
+		}
+		if (toSpawn == 0)
+		{
 			break;
 		}
 	}

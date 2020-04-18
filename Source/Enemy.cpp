@@ -75,8 +75,8 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 		float dist = Length(toTarget);
 		toTarget = Normalize(toTarget);
 
-		float speed = 300.0f;
-		if (dist < 500.0f)
+		float speed = 450.0f;
+		if (dist < 800.0f)
 		{
 			speed *= 0.5f;
 		}

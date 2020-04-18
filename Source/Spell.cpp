@@ -32,12 +32,12 @@ Spell::~Spell()
 
 bool Spell::Init()
 {
-	if (m_image)
+	if (!m_image)
 	{
-		m_image = Image::CreateFromFile("data:Grid.png");
+		m_image = Image::CreateFromFile("data:ArcaneBall.png");
 	}
 
-	m_sprite = new Sprite(32, 32, m_image);
+	m_sprite = new Sprite((float)m_image->GetWidth(), (float)m_image->GetHeight(), m_image);
 	m_sprite->SetTint(1.0f, 0.0f, 1.0f);
 
 	return true;
@@ -53,6 +53,8 @@ void Spell::Update(float deltaTime)
 	Vec2 pos = m_sprite->GetTransform().Position;
 	Vec2 delta = pos + m_direction * (m_speed * deltaTime);
 	m_sprite->SetPosition(delta.X, delta.Y);
+
+	m_sprite->Rotate((2500.0f * deltaTime)); // Not sure why I have to put that size...
 
 	Vec2 view = Graphics::Get().GetView();
 	Vec2 viewSpacePos = pos - view;
@@ -79,6 +81,7 @@ void Spell::Reset()
 	m_direction = Vec2(0.0f, 0.0f);
 	m_speed = 0.0f;
 	m_size = 0.0f;
+	m_seed = rand();
 }
 
 float Spell::GetRadius()

@@ -34,4 +34,6 @@ private:
 	Waffle::Vec2 m_direction;
 	float m_speed;
 	float m_size;
+
+	int m_seed;
 };

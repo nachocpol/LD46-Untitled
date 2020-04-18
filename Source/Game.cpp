@@ -339,10 +339,25 @@ void Game::SpawnEnemies()
 	{
 		if (!enemy->IsActive())
 		{
-			float px = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 10000.0f;
-			px = __min(px, 800.0f);
-			float py = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 10000.0f;
-			py = __min(py, 800.0f);
+			float px = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 7000.0f;
+			if (px < 0.0f)
+			{
+				px -= 800.0f;
+			}
+			else
+			{
+				px += 800.0f;
+			}
+
+			float py = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 7000.0f;
+			if (py < 0.0f)
+			{
+				py -= 800.0f;
+			}
+			else
+			{
+				py += 800.0f;
+			}
 
 			enemy->Spawn(Vec2(px, py), m_bonfires);
 

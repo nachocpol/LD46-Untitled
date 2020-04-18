@@ -29,6 +29,10 @@ private:
 
 	float m_moveSpeed; // pixels/second
 
+	bool m_holding;
+	float m_maxHoldTime;
+	float m_holdTimer;
+
 	float m_spellCD;
 	float m_spellTimer;
 };
