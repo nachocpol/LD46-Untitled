@@ -46,6 +46,8 @@ void Game::Run()
 
 	while (!graphics.Closed())
 	{
+		graphics.BeginFrame();
+
 		timer.Start();
 
 		// Update phase:
