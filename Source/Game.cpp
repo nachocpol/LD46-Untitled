@@ -67,10 +67,13 @@ void Game::Init()
 	m_player = new Player();
 	m_player->Init();
 
-	Bonfire* bf = new Bonfire;
-	bf->Init();
-	m_bonfires.push_back(bf);
-
+	for (int bfi = 0; bfi < k_maxBonfires; ++bfi)
+	{
+		Bonfire* bf = new Bonfire;
+		bf->Init();
+		m_bonfires.push_back(bf);
+	}
+	
 	for (int i = 0; i < k_maxEnemies; ++i)
 	{
 		Enemy* enemy = new Enemy;
@@ -79,10 +82,11 @@ void Game::Init()
 	}
 	
 	// Setup ground (static background)
-	m_groundImage = Image::CreateFromFile("data:GroundCracks.png");
+	m_groundImage = Image::CreateFromFile("data:GroundCrackedBricks.png");
 	float groundNumX = 128;
 	float groundNumY = 128;
 	m_groundSprite = new Sprite(m_groundImage->GetWidth() * groundNumX, m_groundImage->GetHeight() * groundNumY, m_groundImage);
+	m_groundSprite->SetScale(2.0f, 2.0f);
 	m_groundSprite->SetImageScaleBias(groundNumX, groundNumY, 0.0f, 0.0f);
 
 
@@ -201,6 +205,7 @@ void Game::Update(float deltaTime)
 	{
 		m_player->Update(deltaTime);
 
+		// Update the enemies:
 		int enemiesAlive = 0;
 		for (const auto enemy : m_enemies)
 		{
@@ -211,11 +216,23 @@ void Game::Update(float deltaTime)
 			}
 		}
 
+		// Update bonfires:
+		int numBonFiresActive = 0;
 		for (const auto bonfire : m_bonfires)
 		{
-			bonfire->Update(deltaTime);
+			bonfire->Update(deltaTime, m_enemies);
+			if (bonfire->IsActive())
+			{
+				++numBonFiresActive;
+			}
+		}
+		if (numBonFiresActive == 0)
+		{
+			// Game over.
+			m_gameState = State::Defeat;
 		}
 
+		// Check if the round is over:
 		if (m_enemiesToSpawn == 0 && enemiesAlive == 0)
 		{
 			// Round complete:
@@ -223,6 +240,15 @@ void Game::Update(float deltaTime)
 			m_gameState = State::RoundPrep;
 			++m_curRound;
 			m_spawnTimer = 0.0f;
+
+			if (m_curRound == 2)
+			{
+				m_bonfires[1]->Activate(Vec2(-250.0f, -250.0f));
+			}
+			if (m_curRound == 3)
+			{
+				m_bonfires[2]->Activate(Vec2( 250.0f, -250.0f));
+			}
 
 			// You win!
 			if (m_curRound > k_maxRound)
@@ -258,7 +284,7 @@ void Game::Draw()
 	}
 
 	// UI:
-	if (m_gameState == State::MainMenu || m_gameState == State::Pause || m_gameState == State::Win)
+	if (m_gameState == State::MainMenu || m_gameState == State::Pause || m_gameState == State::Win || m_gameState == State::Defeat)
 	{
 		graphics->DrawSprite(m_logoSrite);
 		graphics->DrawSprite(m_controlsSrite);
@@ -284,9 +310,10 @@ void Game::Reset()
 
 	for (const auto bf : m_bonfires)
 	{
-		//bf->Reset();
+		bf->Reset();
 	}
-
+	m_bonfires[0]->Activate(Vec2(0.0f, 250.0f));
+	
 	for (const auto enemy : m_enemies)
 	{
 		enemy->Reset();

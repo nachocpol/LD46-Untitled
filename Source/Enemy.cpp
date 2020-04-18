@@ -55,7 +55,7 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 			dist = dist - (spell->GetRadius() + GetRadius());
 			if (dist <= 20.0f) // Add some fudge to make it easier.
 			{
-				--m_hitPoints;
+				TakeHit();
 			}
 			dead = m_hitPoints == 0;
 			if (dead)
@@ -149,8 +149,43 @@ void Enemy::Spawn(Waffle::Vec2 position, const std::vector<Bonfire*>& bonfires)
 		return;
 	}
 	m_bonfires = bonfires; // we keep the vector in case one is ded.
-	int id = rand() % bonfires.size();
-	m_target = m_bonfires[id];
+	FindTarget();
 	m_active = true;
 	m_sprite->SetPosition(position.X, position.Y);
+}
+
+const Bonfire* Enemy::GetTarget() const
+{
+	return m_target;
+}
+
+Transform Enemy::GetTransform()
+{
+	return m_sprite->GetTransform();
+}
+
+void Enemy::TakeHit()
+{
+	--m_hitPoints;
+}
+
+void Enemy::FindTarget()
+{
+	std::vector<Bonfire*> aliveBonfires;
+	for (const auto bf : m_bonfires)
+	{
+		if (bf->IsActive())
+		{
+			aliveBonfires.push_back(bf);
+		}
+	}
+	if (!aliveBonfires.empty())
+	{
+		int curBf = rand() % aliveBonfires.size();
+		m_target = aliveBonfires[curBf];
+	}
+	else
+	{
+		m_target = nullptr;
+	}
 }

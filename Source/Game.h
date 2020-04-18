@@ -41,7 +41,8 @@ private:
 	void SpawnEnemies();
 
 	const int k_maxEnemies = 256;
-	const int k_maxRound = 2;
+	const int k_maxRound = 5;
+	const int k_maxBonfires = 3;
 
 	Player* m_player;
 	std::vector<Bonfire*>  m_bonfires;
