@@ -18,6 +18,8 @@ public:
 	bool Init();
 	void Update(float deltaTime);
 	void Draw(Waffle::Graphics* graphics);
+	const std::vector<Spell*>& GetSpells()const;
+	void Reset();
 
 private:
 	void CastSpell(float size);

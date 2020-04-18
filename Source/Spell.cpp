@@ -14,11 +14,8 @@ Image* Spell::m_image = nullptr;
 
 Spell::Spell()
 	: m_sprite(nullptr)
-	, m_active(false)
-	, m_direction(0.0f,0.0f)
-	, m_speed(0.0f)
-	, m_size(0.0f)
 {
+	Reset();
 }
 
 Spell::~Spell()
@@ -56,6 +53,15 @@ void Spell::Update(float deltaTime)
 	Vec2 pos = m_sprite->GetTransform().Position;
 	Vec2 delta = pos + m_direction * (m_speed * deltaTime);
 	m_sprite->SetPosition(delta.X, delta.Y);
+
+	Vec2 view = Graphics::Get().GetView();
+	Vec2 viewSpacePos = pos - view;
+	float distFromOrigin = Length(viewSpacePos);
+	if (distFromOrigin > 5000.0f)
+	{
+		Reset();
+	}
+
 }
 
 void Spell::Draw(Graphics* graphics)
@@ -65,6 +71,14 @@ void Spell::Draw(Graphics* graphics)
 		return;
 	}
 	graphics->DrawSprite(m_sprite);
+}
+
+void Spell::Reset()
+{
+	m_active = false;
+	m_direction = Vec2(0.0f, 0.0f);
+	m_speed = 0.0f;
+	m_size = 0.0f;
 }
 
 void Spell::Use(Waffle::Vec2 pos, Vec2 dir, float speed, float size)
@@ -85,4 +99,9 @@ void Spell::Use(Waffle::Vec2 pos, Vec2 dir, float speed, float size)
 bool Spell::IsActive() const
 {
 	return m_active;
+}
+
+Transform Spell::GetTransform()
+{
+	return m_sprite->GetTransform();
 }

@@ -18,9 +18,11 @@ public:
 	bool Init();
 	void Update(float deltaTime);
 	void Draw(Waffle::Graphics* graphics);
+	void Reset();
 
 	void Use(Waffle::Vec2 pos, Waffle::Vec2 dir, float speed, float size);
 	bool IsActive()const;
+	Waffle::Transform GetTransform();
 
 private:
 	Waffle::Sprite* m_sprite;
