@@ -16,13 +16,13 @@ public:
 	Player();
 	~Player();
 	bool Init();
-	void Update(float deltaTime);
+	void Update(float deltaTime, int numBonfires);
 	void Draw(Waffle::Graphics* graphics);
 	const std::vector<Spell*>& GetSpells()const;
 	void Reset();
 
 private:
-	void CastSpell(float size);
+	void CastSpell(float size, int numBonfires);
 
 	Waffle::Image* m_image;
 	Waffle::Sprite* m_sprite;

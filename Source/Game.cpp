@@ -107,12 +107,22 @@ void Game::Init()
 	m_controlsSrite->SetPosition(0.0f, -50.0f);
 	m_controlsSrite->SetIsUI(true);
 
-	LOAD_IMG_SPRITE("data:Frostbite_white.png", m_logoImage, m_logoSrite);
-	m_logoSrite->SetScale(1.25f, 1.25f);
+	LOAD_IMG_SPRITE("data:Frostbite2.png", m_logoImage, m_logoSrite);
+	m_logoSrite->SetScale(1.45f, 1.45f);
 	m_logoSrite->SetPosition(0.0f, 200.0f);
 	m_logoSrite->SetIsUI(true);
 
-	LOAD_IMG_SPRITE("data:PixelControls.png", m_pauseImage, m_pauseSrite);
+	LOAD_IMG_SPRITE("data:PressSpaceToBegin.png", m_pressSpaceImage, m_pressSpaceSprite);
+	m_pressSpaceSprite->SetPosition(0.0f, -200.0f);
+	m_pressSpaceSprite->SetIsUI(true);
+
+	LOAD_IMG_SPRITE("data:win.png", m_winImage, m_winSprite);
+	m_winSprite->SetPosition(0.0f, 0.0f);
+	m_winSprite->SetIsUI(true);
+
+	LOAD_IMG_SPRITE("data:lost.png", m_looseImage, m_looseSprite);
+	m_looseSprite->SetPosition(0.0f, 0.0f);
+	m_looseSprite->SetIsUI(true);
 
 	Reset();
 }
@@ -123,10 +133,18 @@ void Game::Update(float deltaTime)
 	{
 		case State::MainMenu:
 		{
-			if (m_mainMenuTimer > 1.0f) // Some buffer time so the user doesn't accidentally start.
+			float fadeTime = 2.0f;
+			float logoFadeIn = saturate(m_mainMenuTimer / fadeTime);
+			m_logoSrite->SetTint(1.0f, 1.0f, 1.0f, logoFadeIn);
+			m_controlsSrite->SetTint(1.0f, 1.0f, 1.0f, logoFadeIn);
+			m_pressSpaceSprite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
+			if (m_mainMenuTimer > fadeTime) // Some buffer time so the user doesn't accidentally start.
 			{
+				m_pressSpaceSprite->SetTint(1.0f, 1.0f, 1.0f, 1.0f);
 				if (Input::GetKeyPressed(Key::Space))
 				{
+					m_logoSrite->SetTint(1.0f, 1.0f, 1.0f, 1.0f);
+					m_controlsSrite->SetTint(1.0f, 1.0f, 1.0f, 1.0f);
 					m_gameState = State::RoundPrep;
 					m_mainMenuTimer = 0.0f;
 				}
@@ -201,32 +219,22 @@ void Game::Update(float deltaTime)
 			break;
 		}
 		case State::Win:
-		{
-
-			break;
-		}
 		case State::Defeat:
 		{
-
+			if (Input::GetKeyPressed(Key::Space))
+			{
+				m_logoSrite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
+				m_controlsSrite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
+				m_pressSpaceSprite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
+				Reset();
+				m_gameState = State::MainMenu;
+			}
 			break;
 		}
 	}
 
 	if (m_gameState == State::Round)
 	{
-		m_player->Update(deltaTime);
-
-		// Update the enemies:
-		int enemiesAlive = 0;
-		for (const auto enemy : m_enemies)
-		{
-			if (enemy->IsActive())
-			{
-				++enemiesAlive;
-				enemy->Update(deltaTime, m_player->GetSpells());
-			}
-		}
-
 		// Update bonfires:
 		int numBonFiresActive = 0;
 		for (const auto bonfire : m_bonfires)
@@ -241,6 +249,19 @@ void Game::Update(float deltaTime)
 		{
 			// Game over.
 			m_gameState = State::Defeat;
+		}
+
+		m_player->Update(deltaTime, numBonFiresActive);
+
+		// Update the enemies:
+		int enemiesAlive = 0;
+		for (const auto enemy : m_enemies)
+		{
+			if (enemy->IsActive())
+			{
+				++enemiesAlive;
+				enemy->Update(deltaTime, m_player->GetSpells());
+			}
 		}
 
 		// Check if the round is over:
@@ -275,8 +296,11 @@ void Game::Draw()
 {
 	Graphics* graphics = &Graphics::Get();
 
-	// Always render static background:
-	graphics->DrawSprite(m_groundSprite);
+	// Static background
+	if (m_gameState == State::Round || m_gameState == State::RoundPrep || m_gameState == State::Pause)
+	{
+		graphics->DrawSprite(m_groundSprite);
+	}
 
 	// Main render
 	if (m_gameState == State::Round || m_gameState == State::Pause)
@@ -295,10 +319,22 @@ void Game::Draw()
 	}
 
 	// UI:
-	if (m_gameState == State::MainMenu || m_gameState == State::Pause || m_gameState == State::Win || m_gameState == State::Defeat)
+	if (m_gameState == State::MainMenu || m_gameState == State::Pause)
 	{
+		if (m_gameState == State::MainMenu)
+		{
+			graphics->DrawSprite(m_pressSpaceSprite);
+		}
 		graphics->DrawSprite(m_logoSrite);
 		graphics->DrawSprite(m_controlsSrite);
+	}
+	else if (m_gameState == State::Win)
+	{
+		graphics->DrawSprite(m_winSprite);
+	}
+	else if (m_gameState == State::Defeat)
+	{
+		graphics->DrawSprite(m_looseSprite);
 	}
 }
 

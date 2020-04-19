@@ -77,40 +77,45 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 	}
 	else
 	{
-		Vec2 toTarget = m_target->GetTransform().Position - m_sprite->GetTransform().Position;
-		float dist = Length(toTarget);
-		toTarget = Normalize(toTarget);
-
-		float speed = 450.0f;
-		if (dist < 800.0f)
+		// Find a new target:
+		if (!m_target->IsActive())
 		{
-			speed *= 0.5f;
+			FindTarget();
 		}
-		m_sprite->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
-		m_spriteDropShadow->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
 
-		// Juicy rotation:
-		extern float g_totalTime;
-		float rot = sin((g_totalTime + m_seed) * 15.0f);
-		float neg = false;
-		if (rot < 0.0f)
+		// Move towards it:
+		if (m_target)
 		{
-			neg = true;
-		}
-		rot = pow(abs(rot), 0.55f);
-		if (neg)
-		{
-			rot *= -1.0f;
-		}
-		
-		// Align taking into account the direction:
-		float cos0 = Dot(Vec2(0.0f, 1.0f), toTarget);
-		float alignRot = acos(cos0) * RAD_TO_DEG;
+			Vec2 toTarget = m_target->GetTransform().Position - m_sprite->GetTransform().Position;
+			float dist = Length(toTarget);
+			toTarget = Normalize(toTarget);
 
-		m_sprite->SetRotation(alignRot + (rot * 10.0f));
+			float speed = 450.0f;
+			if (dist < 1100.0f)
+			{
+				speed *= 0.45f;
+			}
+			m_sprite->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
+			m_spriteDropShadow->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
 
-		
-		// TODO: logic to select other bonfire
+			// Juicy rotation:
+			extern float g_totalTime;
+			float rot = sin((g_totalTime + m_seed) * 15.0f);
+			float neg = false;
+			if (rot < 0.0f)
+			{
+				neg = true;
+			}
+			rot = pow(abs(rot), 0.55f);
+			if (neg)
+			{
+				rot *= -1.0f;
+			}
+			
+			// Align taking into account the direction:
+			float alignRot = atan2(toTarget.Y, toTarget.X) * RAD_TO_DEG;
+			m_sprite->SetRotation(alignRot + (rot * 10.0f));
+		}
 	}
 }
 

@@ -75,4 +75,10 @@ private:
 	Waffle::Sprite* m_logoSrite; 
 	Waffle::Image* m_pauseImage;
 	Waffle::Sprite* m_pauseSrite;
+	Waffle::Image* m_pressSpaceImage;
+	Waffle::Sprite* m_pressSpaceSprite;
+	Waffle::Image* m_winImage;
+	Waffle::Sprite* m_winSprite;
+	Waffle::Image* m_looseImage;
+	Waffle::Sprite* m_looseSprite;
 };

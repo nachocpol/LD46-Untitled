@@ -56,7 +56,7 @@ bool Player::Init()
 	return true;
 }
 
-void Player::Update(float deltaTime)
+void Player::Update(float deltaTime, int numBonfires)
 {
 	// Movement:
 	Vec2 input(0.0f, 0.0f);
@@ -83,10 +83,10 @@ void Player::Update(float deltaTime)
 
 		float sizeMod = (m_holdTimer / m_maxHoldTime) * 3.0f; // Increase the size
 		
-		// But alo take into account timer! Avoid spamming it.
+		// But aslo take into account timer! Avoid spamming it.
 		if (m_spellTimer > m_spellCD)
 		{
-			CastSpell(2.5f + sizeMod);
+			CastSpell(2.5f + sizeMod, numBonfires);
 			m_spellTimer = 0.0f;
 		}
 
@@ -100,7 +100,6 @@ void Player::Update(float deltaTime)
 	{
 		m_holdTimer += deltaTime;
 	}
-
 
 	// Update spells:
 	for (const auto spell : m_spellPool)
@@ -137,7 +136,7 @@ void Player::Reset()
 	m_maxHoldTime = 1.5f;
 	m_holdTimer = 0.0f;
 
-	m_spellCD = 0.35f;
+	m_spellCD = 0.3f;
 	m_spellTimer = m_spellCD;
 
 	if (m_sprite)
@@ -152,11 +151,8 @@ void Player::Reset()
 	}
 }
 
-void Player::CastSpell(float size)
+void Player::CastSpell(float size, int numBonfires)
 {
-	// The number of balls could be related to how many bonfires you have!
-
-
 	Vec2 pos = m_sprite->GetTransform().Position;
 
 	Vec2 viewport = Graphics::Get().GetCurViewport();
@@ -185,7 +181,7 @@ void Player::CastSpell(float size)
 		dirs[2].Y = sin(beta);
 	}
 
-	int toSpawn = 3;
+	int toSpawn = numBonfires;
 	for (const auto spell : m_spellPool)
 	{
 		if (!spell->IsActive())
