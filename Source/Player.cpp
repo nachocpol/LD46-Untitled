@@ -71,6 +71,18 @@ void Player::Update(float deltaTime, int numBonfires)
 	m_sprite->Move(deltaX, deltaY);
 	m_spriteDropShadow->Move(deltaX, deltaY);
 
+	if (input.X != 0.0f)
+	{
+		if (input.X < 0.0f)
+		{
+			m_sprite->SetScale(1.5f, 1.5f);
+		}
+		else
+		{
+			m_sprite->SetScale(-1.5f, 1.5f);
+		}
+	}
+
 	// Jumps: TODO
 
 	// Spell cast
