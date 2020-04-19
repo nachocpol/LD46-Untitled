@@ -31,6 +31,7 @@ public:
 	Game();
 	~Game();
 	void Run();
+	static Waffle::Image* GetDropShadow();
 	
 private:
 	void Init();

@@ -3,10 +3,8 @@
 #include "Graphics.h"
 #include "Sprite.h"
 #include "Image.h"
-
+#include "Logging.h"
 #include "MathUtils.h"
-
-#include <cstdio>
 
 using namespace Waffle;
 
@@ -98,7 +96,7 @@ void Spell::Use(Waffle::Vec2 pos, Vec2 dir, float speed, float size)
 {
 	if (m_active)
 	{
-		printf("Trying to use spell while still active!!!\n");
+		ERR("Trying to use spell while still active!!!\n");
 		return;
 	}
 	m_direction = dir;

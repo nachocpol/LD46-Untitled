@@ -24,7 +24,9 @@ public:
 private:
 	void CastSpell(float size);
 
+	Waffle::Image* m_image;
 	Waffle::Sprite* m_sprite;
+	Waffle::Sprite* m_spriteDropShadow;
 	std::vector<Spell*> m_spellPool;
 
 	float m_moveSpeed; // pixels/second

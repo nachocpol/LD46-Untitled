@@ -33,6 +33,7 @@ public:
 private:
 	void FindTarget();
 	Waffle::Sprite* m_sprite;
+	Waffle::Sprite* m_spriteDropShadow;
 	static Waffle::Image* m_image;
 
 	std::vector<Bonfire*> m_bonfires;

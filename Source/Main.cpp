@@ -1,5 +1,5 @@
-
 #include "FileUtils.h"
+#include "Logging.h"
 
 #include "Game.h"
 #include "Window.h"
@@ -15,6 +15,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	Game theGame;
 	theGame.Run();
-	
+
+	Logger::Get()->FlushToFile();
+
 	return 0;
 }

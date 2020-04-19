@@ -5,8 +5,7 @@
 #include "Graphics.h"
 #include "Sprite.h"
 #include "Image.h"
-
-#include <cstdio>
+#include "Logging.h"
 
 using namespace Waffle;
 
@@ -91,7 +90,7 @@ void Bonfire::Activate(Vec2 position)
 {
 	if (m_active)
 	{
-		printf("Bonfire already active!! \n");
+		ERR("Bonfire already active!! \n");
 		return;
 	}
 	m_active = true;

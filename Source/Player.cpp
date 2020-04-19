@@ -1,9 +1,11 @@
 #include "Player.h"
 #include "Spell.h"
+#include "Game.h"
 
 #include "Graphics.h"
 #include "Sprite.h"
 #include "Input.h"
+#include "Image.h"
 
 using namespace Waffle;
 
@@ -32,8 +34,13 @@ Player::~Player()
 
 bool Player::Init()
 {
-	m_sprite = new Sprite(64, 64);
-	m_sprite->SetTint(0.4f, 0.2f, 0.8f);
+	m_image = Image::CreateFromFile("data:UhmWiizard.png");
+	m_sprite = new Sprite((float)m_image->GetWidth(), (float)m_image->GetHeight(), m_image);
+	m_sprite->SetScale(1.5f, 1.5f);
+
+	Image* dropShadowImg = Game::GetDropShadow();
+	m_spriteDropShadow = new Sprite((float)dropShadowImg->GetWidth(), (float)dropShadowImg->GetHeight(), dropShadowImg);
+	m_spriteDropShadow->SetScale(5.0f, 1.0f);
 
 	// Init spell pool:
 	const int spellPoolSize = 256;
@@ -57,7 +64,10 @@ void Player::Update(float deltaTime)
 	input.X -= Input::GetKeyPressed(Key::A) ? 1.0f : 0.0f;
 	input.Y += Input::GetKeyPressed(Key::W) ? 1.0f : 0.0f;
 	input.Y -= Input::GetKeyPressed(Key::S) ? 1.0f : 0.0f;
-	m_sprite->Move(input.X * deltaTime * m_moveSpeed, input.Y * deltaTime * m_moveSpeed);
+	float deltaX = input.X * deltaTime * m_moveSpeed;
+	float deltaY = input.Y * deltaTime * m_moveSpeed;
+	m_sprite->Move(deltaX, deltaY);
+	m_spriteDropShadow->Move(deltaX, deltaY);
 
 	// Jumps: TODO
 
@@ -104,6 +114,7 @@ void Player::Update(float deltaTime)
 
 void Player::Draw(Waffle::Graphics* graphics)
 {
+	graphics->DrawSprite(m_spriteDropShadow);
 	graphics->DrawSprite(m_sprite);
 
 	// Update spells:
@@ -131,7 +142,8 @@ void Player::Reset()
 
 	if (m_sprite)
 	{
-		m_sprite->SetPosition(0.0f, 0.0f);
+		m_sprite->SetPosition(0.0f, -150.0f);
+		m_spriteDropShadow->SetPosition(2.0f, -195.0f);
 	}
 
 	for (const auto spell : m_spellPool)
@@ -178,7 +190,9 @@ void Player::CastSpell(float size)
 	{
 		if (!spell->IsActive())
 		{
-			spell->Use(pos, dirs[--toSpawn], 900.0f, size);
+			Vec2 curDir = dirs[--toSpawn];
+			Vec2 offPos = pos + curDir * 50.0f;
+			spell->Use(offPos, curDir, 900.0f, size);
 		}
 		if (toSpawn == 0)
 		{

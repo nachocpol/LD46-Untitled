@@ -8,8 +8,7 @@
 #include "Time.h"
 #include "Graphics.h"
 #include "Input.h"
-
-#include <cstdio>
+#include "Logging.h"
 
 using namespace Waffle;
 
@@ -32,7 +31,7 @@ void Game::Run()
 	Graphics& graphics = Graphics::Get();
 	if (!graphics.Init())
 	{
-		printf("Failed to initialize graphics! \n");
+		ERR("Failed to initialize graphics! \n");
 		return;
 	}
 
@@ -62,6 +61,16 @@ void Game::Run()
 		deltaTime = timer.Stop() / 1000.0f;
 		g_totalTime += deltaTime;
 	}
+}
+
+Image* Game::GetDropShadow()
+{
+	static Image* kDropShadow = nullptr;
+	if (!kDropShadow)
+	{
+		kDropShadow = Image::CreateFromFile("data:DropShadow.png");
+	}
+	return kDropShadow;
 }
 
 void Game::Init()
@@ -114,7 +123,7 @@ void Game::Update(float deltaTime)
 	{
 		case State::MainMenu:
 		{
-			if (m_mainMenuTimer > 2.5f) // Some buffer time so the user doesn't accidentally start.
+			if (m_mainMenuTimer > 1.0f) // Some buffer time so the user doesn't accidentally start.
 			{
 				if (Input::GetKeyPressed(Key::Space))
 				{
@@ -156,7 +165,7 @@ void Game::Update(float deltaTime)
 			
 			m_gameState = State::Round;
 
-			printf("Roud prep\n Round num: %i\n Enemies for the round: %i\n", m_curRound, m_enemiesToSpawn);
+			INFO("Roud prep\n Round num: %i\n Enemies for the round: %i\n", m_curRound, m_enemiesToSpawn);
 
 			break;
 		}
@@ -238,7 +247,7 @@ void Game::Update(float deltaTime)
 		if (m_enemiesToSpawn == 0 && enemiesAlive == 0)
 		{
 			// Round complete:
-			printf("Round completed! \n");
+			INFO("Round completed! \n");
 			m_gameState = State::RoundPrep;
 			++m_curRound;
 			m_spawnTimer = 0.0f;
@@ -256,7 +265,7 @@ void Game::Update(float deltaTime)
 			if (m_curRound > k_maxRound)
 			{
 				m_gameState = State::Win;
-				printf("You won! \n");
+				INFO("You won! \n");
 			}
 		}
 	}
@@ -335,7 +344,7 @@ void Game::SpawnEnemies()
 		m_enemiesToSpawn -= numberToSpawn;
 	}
 
-	printf("Spawned: %i enemies \n", numberToSpawn);
+	INFO("Spawned: %i enemies \n", numberToSpawn);
 
 	for (const auto enemy : m_enemies)
 	{

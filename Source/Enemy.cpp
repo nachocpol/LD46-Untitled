@@ -1,13 +1,14 @@
 #include "Enemy.h"
 #include "Spell.h"
 #include "Bonfire.h"
+#include "Game.h"
 
 #include "Graphics.h"
 #include "Sprite.h"
 #include "Image.h"
 #include "MathUtils.h"
+#include "Logging.h"
 
-#include <cstdio>
 #include <stdlib.h>
 
 using namespace Waffle;
@@ -29,10 +30,15 @@ bool Enemy::Init()
 {
 	if (!m_image)
 	{
-		m_image = Image::CreateFromFile("data:Grid.png");
+		m_image = Image::CreateFromFile("data:IceShardMonster.png");
 	}
-	m_sprite = new Sprite(32, 32, m_image);
-	m_sprite->SetTint(0.7f, 0.7f, 1.0f);
+	m_sprite = new Sprite((float)m_image->GetWidth(), (float)m_image->GetHeight(),m_image);
+	float rndScale = (((float)rand() / (float)RAND_MAX) * 2.0f) + 1.5f;
+	m_sprite->SetScale(rndScale, rndScale);
+
+	Image* shadowImg = Game::GetDropShadow();
+	m_spriteDropShadow = new Sprite((float)shadowImg->GetWidth(), (float)shadowImg->GetHeight(), shadowImg);
+	m_spriteDropShadow->SetScale(rndScale * 1.6f, rndScale * 1.6f);
 
 	return true;
 }
@@ -53,7 +59,7 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 			Vec2 spellPos = spell->GetTransform().Position;
 			float dist = Length(spellPos - m_sprite->GetTransform().Position);
 			dist = dist - (spell->GetRadius() + GetRadius());
-			if (dist <= 20.0f) // Add some fudge to make it easier.
+			if (dist <= 1.0f) // Add some fudge to make it easier.
 			{
 				TakeHit();
 			}
@@ -81,6 +87,7 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 			speed *= 0.5f;
 		}
 		m_sprite->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
+		m_spriteDropShadow->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
 
 		// Juicy rotation:
 		extern float g_totalTime;
@@ -113,7 +120,7 @@ void Enemy::Draw(Graphics* graphics)
 	{
 		return;
 	}
-
+	graphics->DrawSprite(m_spriteDropShadow);
 	graphics->DrawSprite(m_sprite);
 }
 
@@ -145,13 +152,14 @@ void Enemy::Spawn(Waffle::Vec2 position, const std::vector<Bonfire*>& bonfires)
 {
 	if (m_active)
 	{
-		printf("Trying to spawn while still active. \n");
+		ERR("Trying to spawn while still active. \n");
 		return;
 	}
 	m_bonfires = bonfires; // we keep the vector in case one is ded.
 	FindTarget();
 	m_active = true;
 	m_sprite->SetPosition(position.X, position.Y);
+	m_spriteDropShadow->SetPosition(position.X, position.Y);
 }
 
 const Bonfire* Enemy::GetTarget() const
