@@ -7,6 +7,8 @@
 #include "Input.h"
 #include "Image.h"
 
+#include "Enemy.h"
+
 using namespace Waffle;
 
 Player::Player()
@@ -136,7 +138,7 @@ void Player::Reset()
 	m_maxHoldTime = 1.5f;
 	m_holdTimer = 0.0f;
 
-	m_spellCD = 0.3f;
+	m_spellCD = 0.22f;
 	m_spellTimer = m_spellCD;
 
 	if (m_sprite)

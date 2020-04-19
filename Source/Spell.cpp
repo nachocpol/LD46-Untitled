@@ -1,4 +1,5 @@
 #include "Spell.h"
+#include "Enemy.h"
 
 #include "Graphics.h"
 #include "Sprite.h"
@@ -61,7 +62,6 @@ void Spell::Update(float deltaTime)
 	{
 		Reset();
 	}
-
 }
 
 void Spell::Draw(Graphics* graphics)

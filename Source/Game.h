@@ -42,7 +42,7 @@ private:
 
 	void SpawnEnemies();
 
-	const int k_maxEnemies = 256;
+	const int k_maxEnemies = 320;
 	const int k_maxRound = 5;
 	const int k_maxBonfires = 3;
 
@@ -61,6 +61,8 @@ private:
 	float m_totalRoundTime;
 
 	float m_pauseTimer;
+
+	float m_winLostTimer;
 
 	float m_totalHitPoints;
 	float m_curHitPoints;

@@ -35,6 +35,8 @@ void Game::Run()
 		return;
 	}
 
+	graphics.SetRenderScale(1.0f);
+
 	// Init after graphics, as we may load images:
 	Init();
 
@@ -96,13 +98,16 @@ void Game::Init()
 		enemy->Init();
 		m_enemies.push_back(enemy);
 	}
+
+	// Get it now so it creates the particles pool ahead of time.
+	Particles::Get();
 	
 	// Setup ground (static background)
-	m_groundImage = Image::CreateFromFile("data:GroundCrackedBricks.png");
+	m_groundImage = Image::CreateFromFile("data:LargeBricksCracked.png");
 	float groundNumX = 128;
 	float groundNumY = 128;
 	m_groundSprite = new Sprite(m_groundImage->GetWidth() * groundNumX, m_groundImage->GetHeight() * groundNumY, m_groundImage);
-	m_groundSprite->SetScale(2.0f, 2.0f);
+	m_groundSprite->SetScale(1.0f, 1.0f);
 	m_groundSprite->SetImageScaleBias(groundNumX, groundNumY, 0.0f, 0.0f);
 
 
@@ -140,6 +145,7 @@ void Game::Update(float deltaTime)
 		{
 			float fadeTime = 2.0f;
 			float logoFadeIn = saturate(m_mainMenuTimer / fadeTime);
+			logoFadeIn *= logoFadeIn;
 			m_logoSrite->SetTint(1.0f, 1.0f, 1.0f, logoFadeIn);
 			m_controlsSrite->SetTint(1.0f, 1.0f, 1.0f, logoFadeIn);
 			m_pressSpaceSprite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
@@ -226,8 +232,10 @@ void Game::Update(float deltaTime)
 		case State::Win:
 		case State::Defeat:
 		{
-			if (Input::GetKeyPressed(Key::Space))
+			m_winLostTimer += deltaTime;
+			if (m_winLostTimer > 1.5f &&  Input::GetKeyPressed(Key::Space))
 			{
+				m_winLostTimer = 0.0f;
 				m_logoSrite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
 				m_controlsSrite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
 				m_pressSpaceSprite->SetTint(1.0f, 1.0f, 1.0f, 0.0f);
@@ -268,6 +276,9 @@ void Game::Update(float deltaTime)
 				enemy->Update(deltaTime, m_player->GetSpells());
 			}
 		}
+
+		// Update particles:
+		Particles::Get().Update(deltaTime);
 
 		// Check if the round is over:
 		if (m_enemiesToSpawn == 0 && enemiesAlive == 0)
@@ -321,6 +332,8 @@ void Game::Draw()
 		}
 
 		m_player->Draw(graphics);
+
+		Particles::Get().Draw(graphics);
 	}
 
 	// UI:
@@ -354,6 +367,8 @@ void Game::Reset()
 	m_totalRoundTime = 0.0f;
 
 	m_pauseTimer = 0.0f;
+
+	m_winLostTimer = 0.0f;
 
 	m_enemiesToSpawn = 0;
 	m_spawnedEnemies = 0;

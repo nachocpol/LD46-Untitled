@@ -61,7 +61,7 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 			dist = dist - (spell->GetRadius() + GetRadius());
 			if (dist <= 1.0f) // Add some fudge to make it easier.
 			{
-				TakeHit();
+				TakeHit(false);
 			}
 			dead = m_hitPoints == 0;
 			if (dead)
@@ -90,10 +90,10 @@ void Enemy::Update(float deltaTime, std::vector<Spell*> spells)
 			float dist = Length(toTarget);
 			toTarget = Normalize(toTarget);
 
-			float speed = 450.0f;
-			if (dist < 1100.0f)
+			float speed = 650.0f;
+			if (dist < 1700.0f)
 			{
-				speed *= 0.45f;
+				speed *= 0.25f;
 			}
 			m_sprite->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
 			m_spriteDropShadow->Move(toTarget.X * deltaTime * speed, toTarget.Y * deltaTime * speed);
@@ -177,8 +177,10 @@ Transform Enemy::GetTransform()
 	return m_sprite->GetTransform();
 }
 
-void Enemy::TakeHit()
+void Enemy::TakeHit(bool bonfire)
 {
+	Color col = bonfire ? Color(0.85f, 0.6f, 0.0f, 1.0f) : Color(0.75f, 0.2f, 0.9f, 1.0f);
+	Particles::Get().SpawnParticles(70, m_sprite->GetTransform().Position, col);
 	--m_hitPoints;
 }
 
@@ -201,4 +203,116 @@ void Enemy::FindTarget()
 	{
 		m_target = nullptr;
 	}
+}
+
+Particles& Particles::Get()
+{
+	static Particles* kInstance = nullptr;
+	if (!kInstance)
+	{
+		kInstance = new Particles;
+		kInstance->Init();
+	}
+	return *kInstance;
+}
+
+void Particles::SpawnParticles(int num, Vec2 pos, Color initialColor)
+{
+	for (auto& particle : m_particlesPool)
+	{
+		if (!particle.Active)
+		{
+			--num;
+
+			particle.Active = true;
+			particle.ParticleSprite->SetPosition(pos.X, pos.Y);
+
+			// HUHUH
+			particle.InitColor.R = saturate(initialColor.R + (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 0.15f);
+			particle.InitColor.G = saturate(initialColor.G + (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 0.15f);
+			particle.InitColor.B = saturate(initialColor.B + (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 0.15f);
+			particle.ParticleSprite->SetTint(particle.InitColor.R, particle.InitColor.G, particle.InitColor.B);
+			
+			float ml= ((float)rand() / (float)RAND_MAX) * 2.0f + 0.2f;
+			particle.MaxLife = 1.0f;
+			
+			float sp = ((float)rand() / (float)RAND_MAX) * 300.0f + 250.0f;
+			particle.Speed = sp;
+
+			float rot = ((float)rand() / (float)RAND_MAX) * 2.0f * PI;
+			particle.MoveDir.X = cos(rot);
+			particle.MoveDir.Y = sin(rot);
+
+			if (num == 0)
+			{
+				break;
+			}
+		}
+	}
+}
+
+void Particles::Update(float deltaTime)
+{
+	for (auto& particle : m_particlesPool)
+	{
+		if (particle.Active)
+		{
+			particle.LifeTime += deltaTime;
+			if (particle.LifeTime > particle.MaxLife)
+			{
+				particle.Reset();
+			}
+			else
+			{
+				float lifeDelta = 1.0f - saturate(particle.LifeTime / particle.MaxLife);
+				particle.ParticleSprite->SetTint(particle.InitColor.R, particle.InitColor.G, particle.InitColor.B, lifeDelta * lifeDelta);
+				particle.ParticleSprite->Move(
+					particle.MoveDir.X * particle.Speed * deltaTime,
+					particle.MoveDir.Y * particle.Speed * deltaTime
+				);
+			}
+		}
+	}
+}
+
+void Particles::Draw(Graphics* graphics)
+{
+	for (auto& particle : m_particlesPool)
+	{
+		if (particle.Active)
+		{
+			graphics->DrawSprite(particle.ParticleSprite);
+		}
+	}
+}
+
+void Particles::Reset()
+{
+	for (auto& particle : m_particlesPool)
+	{
+		particle.Reset();
+	}
+}
+
+void Particles::Init()
+{
+	m_circleImage = Image::CreateFromFile("data:ParticleCircle.png");
+
+	m_particlesPool.resize(k_maxParticles);
+	for (int p = 0; p < k_maxParticles; ++p)
+	{
+		Particle& particle = m_particlesPool[p];
+		particle.ParticleSprite = new Sprite((float)m_circleImage->GetWidth(), (float)m_circleImage->GetHeight(), m_circleImage);
+		particle.Reset();
+	}
+}
+
+void Particles::Particle::Reset()
+{
+	Active = false;
+	LifeTime = 0.0f;
+	MaxLife = 0.0f;
+	Speed = 0.0f;
+	MoveDir = Vec2();
+	InitColor = Color();
 }

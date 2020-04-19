@@ -28,7 +28,7 @@ public:
 	void Spawn(Waffle::Vec2 position, const std::vector<Bonfire*>& bonfires);
 	const Bonfire* GetTarget()const;
 	Waffle::Transform GetTransform();
-	void TakeHit();
+	void TakeHit(bool bonfire);
 
 private:
 	void FindTarget();
@@ -41,4 +41,32 @@ private:
 	int m_hitPoints;
 	bool m_active;
 	int m_seed;
+};
+
+class Particles
+{
+public:
+	static Particles& Get();
+	void SpawnParticles(int num, Waffle::Vec2 pos, Waffle::Color initialColor);
+	void Update(float deltaTime);
+	void Draw(Waffle::Graphics* graphics);
+	void Reset();
+
+private:
+	void Init();
+	struct Particle
+	{
+		void Reset();
+		bool Active;
+		Waffle::Sprite* ParticleSprite;
+		float LifeTime;
+		float MaxLife;
+		Waffle::Vec2 MoveDir;
+		float Speed;
+		Waffle::Color InitColor;
+	};
+	const static int k_maxParticles = 1024;
+	std::vector<Particle> m_particlesPool;
+
+	Waffle::Image* m_circleImage;
 };

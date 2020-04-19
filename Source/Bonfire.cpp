@@ -62,7 +62,7 @@ void Bonfire::Update(float deltaTime, const std::vector<Enemy*> enemies)
 			dist = dist - (GetRadius() + enemy->GetRadius());
 			if (dist < -10.0f) // Fudge  factor..
 			{
-				enemy->TakeHit(); // Also kill the  enemy.
+				enemy->TakeHit(true); // Also kill the  enemy.
 				--m_curHits;
 				if (m_curHits <= 0)
 				{
