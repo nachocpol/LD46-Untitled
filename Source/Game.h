@@ -32,6 +32,7 @@ public:
 	~Game();
 	void Run();
 	static Waffle::Image* GetDropShadow();
+	static float GetTotalTime();
 	
 private:
 	void Init();

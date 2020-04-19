@@ -32,7 +32,11 @@ public:
 
 private:
 	Waffle::Sprite* m_sprite;
-	Waffle::Image* m_image;
+	std::vector<Waffle::Image*> m_frames;
+	int m_curFrame;
+	float m_lastTime;
+	Waffle::Sprite* m_shadowSprite;
+
 	HealthBar* m_healthBar;
 
 	bool m_active;

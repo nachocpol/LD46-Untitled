@@ -48,9 +48,9 @@ void HealthBar::Draw(Graphics* graphics)
 	float size = fmax((float)m_bonfire->GetCurHP() / (float)m_bonfire->GetMaxHP(), 0.1f);
 
 	Vec2 bfPos = m_bonfire->GetTransform().Position;
-	m_spriteBackground->SetPosition(bfPos.X, bfPos.Y - 70.0f);
+	m_spriteBackground->SetPosition(bfPos.X, bfPos.Y + 80.0f);
 	m_sprite->SetScale(size, 1.0f);
-	m_sprite->SetPosition(bfPos.X, bfPos.Y - 70.0f);
+	m_sprite->SetPosition(bfPos.X, bfPos.Y + 80.0f);
 
 
 	graphics->DrawSprite(m_spriteBackground);

@@ -73,6 +73,11 @@ Image* Game::GetDropShadow()
 	return kDropShadow;
 }
 
+float Game::GetTotalTime()
+{
+	return g_totalTime;
+}
+
 void Game::Init()
 {
 	m_player = new Player();
