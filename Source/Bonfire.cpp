@@ -3,9 +3,9 @@
 #include "Enemy.h"
 #include "Game.h"
 
-#include "Graphics.h"
-#include "Sprite.h"
-#include "Image.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/Sprite.h"
+#include "Graphics/Image.h"
 #include "Logging.h"
 
 using namespace Waffle;

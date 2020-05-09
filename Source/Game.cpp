@@ -2,11 +2,11 @@
 #include "Player.h"
 #include "Bonfire.h"
 #include "Enemy.h"
-#include "Image.h"
-#include "Sprite.h"
+#include "Graphics/Image.h"
+#include "Graphics/Sprite.h"
 
 #include "Time.h"
-#include "Graphics.h"
+#include "Graphics/Graphics.h"
 #include "Input.h"
 #include "Logging.h"
 

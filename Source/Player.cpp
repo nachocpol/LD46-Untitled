@@ -2,10 +2,10 @@
 #include "Spell.h"
 #include "Game.h"
 
-#include "Graphics.h"
-#include "Sprite.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/Sprite.h"
 #include "Input.h"
-#include "Image.h"
+#include "Graphics/Image.h"
 
 #include "Enemy.h"
 

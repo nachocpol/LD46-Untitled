@@ -1,11 +1,11 @@
 #include "Spell.h"
 #include "Enemy.h"
 
-#include "Graphics.h"
-#include "Sprite.h"
-#include "Image.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/Sprite.h"
+#include "Graphics/Image.h"
 #include "Logging.h"
-#include "MathUtils.h"
+#include "Graphics/MathUtils.h"
 
 using namespace Waffle;
 

@@ -1,9 +1,9 @@
 #include "HealthBar.h"
 #include "Bonfire.h"
 
-#include "Graphics.h"
-#include "Image.h"
-#include "Sprite.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/Image.h"
+#include "Graphics/Sprite.h"
 
 using namespace Waffle;
 
